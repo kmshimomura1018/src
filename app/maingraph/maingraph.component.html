@@ -1,0 +1,136 @@
+<!--
+<div style="height: 30px;" class="flex_wrap_left">
+  <div><input type="file" id="files" name="files[]" multiple /></div>
+</div>
+-->
+<output id="list"></output>
+<div class="flex_wrap_left">
+  <div class="main">
+    <div id="svg_wrapper" class="svgtxt">
+      <!-- test ooo---
+      <div id="svg_graline_wrapper" style="border: 1px solid #212121;"></div>
+      -->
+      <!--<div id="svg_drawrect_wrapper"></div>-->
+    </div>
+
+    <div class="flex_wrap_left" style="padding-top: 5px; padding-bottom: 5px;">
+      <div style="margin-left: 20px;" class="flex_wrap_left">
+        <div class="button_1">全期間</div>
+        <div style="margin-left: 10px;">{{allgraphinfo.gra_disp_start_base}} ～ {{allgraphinfo.gra_disp_end_base}}</div>
+      </div>
+      <div style="margin-left: 20px;" class="flex_wrap_left">
+        <div class="button_1">表示期間</div>
+        <div style="margin-left: 10px;">{{allgraphinfo.all_gra_disp_start}} ～ {{allgraphinfo.all_gra_disp_end}}</div>
+      </div>
+    </div>
+    <div style="border: 1px solid silver; width: 100%;">
+      <table id="data_info_table"
+        style="width: 100%;">
+      <th></th>
+      <th>色</th>
+      <th>データ名</th>
+      <th>単位</th>
+      <th>データ数</th>
+      <th>期間平均値</th>
+      <th>小数点桁</th>
+      <!-- TODO GraphKind -->
+      <th *ngIf="allgraphinfo.grakind !== 'bar'">変換式</th>
+
+      <tr *ngFor="let onegraphinfo of allgraphinfo.oneinfo"
+          style="height: 0px;"
+          [style.background-color]="allgraphinfo.retselectedcol(onegraphinfo)">
+        <td>
+          <div style="height: 20px; width: 20px; margin-left: 5px;"
+              *ngIf="allgraphinfo.oneinfo.length > 1">
+            <mat-checkbox
+              color="primary"
+              (change)="change_graph()"
+              [(ngModel)]="onegraphinfo.isdisplay"></mat-checkbox>
+          </div>
+        </td>
+        <td><div style="border: 1px solid black; width: 30px; height: 12px;" [style.background-color]="onegraphinfo.colstr_buf"></div></td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.dataname_buf_new}}</td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.unitstr_buf}}</td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.datastr_list.length}}</td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.gra_disp_avrg}}　{{onegraphinfo.unitstr_buf}}</td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.fixed_digit_buf}}</td>
+        <td *ngIf="allgraphinfo.grakind !== 'bar'" (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.adjust_info.formula}}</td>
+        <td></td>
+      </tr>
+
+      <!--<div style="border: 1px solid silver; height: 20px;"></div>-->
+      </table>
+    </div>
+  </div>
+  <div style="border: 1px solid silver; width: 260px;">
+    <div class="flex_wrap_left" style="border: 1px solid blueviolet; height: 43px;">
+      <button mat-icon-button (click)="reset_zoom()">
+        <mat-icon>zoom_out_map</mat-icon>
+      </button>
+      <button mat-icon-button (click)="zoom_in()">
+        <mat-icon>zoom_in</mat-icon>
+      </button>
+      <button mat-icon-button (click)="zoom_out()">
+        <mat-icon>zoom_out</mat-icon>
+      </button>
+    </div>
+
+    <div *ngFor="let onegraphinfo of allgraphinfo.oneinfo">
+      <div *ngIf="onegraphinfo.isdisplay_datalist">
+        <div style="margin: 3px;">{{onegraphinfo.datalist_title}}</div>
+      </div>
+    </div>
+    <!--
+    <mat-nav-list class="my-list-item">
+      <div id="datalist_nav_frame">
+        <div *ngFor="let onegraphinfo of allgraphinfo.oneinfo">
+          <div *ngIf="onegraphinfo.isdisplay_datalist">
+            <mat-list-item *ngFor="let onedataitem of onegraphinfo.datastr_list">
+              {{onedataitem}}
+            </mat-list-item>
+          </div>
+        </div>     
+      </div>
+    </mat-nav-list>
+    -->
+    <!--minBufferPx="200" maxBufferPx="10000"-->
+    <!--can't cdkVirtualFor ???-->
+    <!---->
+    <cdk-virtual-scroll-viewport itemSize="50"
+          id="datalist_nav_frame">
+      <div *ngFor="let onegraphinfo of allgraphinfo.oneinfo">
+        <div *ngIf="onegraphinfo.isdisplay_datalist">
+          <div *ngFor="let onedataitem of onegraphinfo.datastr_list"
+              class="my-cdk-list-item">{{onedataitem}}</div>
+        </div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+
+    <div class="flex_wrap_right"
+        style="border: 1px solid silver; height: 43px; margin-top: 10px;">
+      <div style="margin-left: 10px;">
+        <a href="https://twitter.com/kemycreative_P/status/1047789518907092992" target="_blank" rel="noopener">
+          <img src="../../assets/twitter_icon.png" height="40px" width="40px;">
+        </a>
+      </div>
+      <div style="margin-left: 10px; margin-right: 10px;">
+        <a href="https://www.facebook.com/kmshimomura/" target="_blank" rel="noopener">
+          <img src="../../assets/facebook.png" height="40px" width="40px;">
+        </a>
+      </div>
+    </div>
+  </div>
+  <div style="width: 320px" *ngIf="!def.ispro">
+    <div>
+      <ng-adsense
+        [display]="'inline-block'"
+        [adClient]="'ca-pub-8697434929081249'"
+        [width]="300"
+        [height]="600"
+        [adSlot]="4251898444">
+      </ng-adsense>
+    </div>
+  </div>
+</div>
+
+<app-mymqtt [getdata]="main_app.reqdata" (msgnotify)="main_app.onmsgnotify($event)"></app-mymqtt>

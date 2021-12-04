@@ -1,0 +1,35 @@
+<div style="font-weight: bold; margin-top: 10px; margin-bottom: 20px;">{{title}}</div>
+<mat-radio-group
+  [(ngModel)]="data.selected_grabarspan"
+  aria-label="Select an option">
+  <mat-radio-button
+    color="primary"
+    value="1min" style="margin-left: 5px;">1分</mat-radio-button>
+  <mat-radio-button
+    color="primary"
+    value="10min" style="margin-left: 5px;">10分</mat-radio-button>
+  <mat-radio-button
+    color="primary"
+    value="1hour" style="margin-left: 5px;">1時間</mat-radio-button>
+  <mat-radio-button
+    color="primary"
+    value="1day" style="margin-left: 5px;">1日</mat-radio-button>
+  <mat-radio-button
+    color="primary"
+    value="auto" style="margin-left: 5px;">自動</mat-radio-button>
+
+  <!--TODO Custom <mat-radio-button value="1"></mat-radio-button>-->
+</mat-radio-group>
+<div style="width: 100%; margin-top: 20px;">
+  <div style="margin-left: auto; width: 220px;">
+    <mat-dialog-actions>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px; margin-right: 10px"
+          (click)="save()">OK</button>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px;"
+          (click)="close()">キャンセル</button>
+    </mat-dialog-actions>
+  </div>
+</div>
+

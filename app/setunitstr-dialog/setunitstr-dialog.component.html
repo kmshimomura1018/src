@@ -1,0 +1,38 @@
+<form
+  (ngSubmit)="setunitstr()"
+  [formGroup]="myInputUnitstrForm">
+  <div formArrayName="dinfos">
+    <div>
+      <div style="font-weight: bold; margin-right: 20px; margin-bottom: 10px;">単位名設定</div>
+      <mat-form-field>
+        <mat-select name="setunitstrlist"
+            placeholder = "データ名選択"
+            [(value)]="selected_dinfo.dataid">
+          <mat-option *ngFor="let dinfo of dinfos.controls;"
+              [value]="dinfo.controls.dinfo.value.dataid">
+              {{dinfo.controls.dinfo.value.dataname}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-form-field>
+    <input
+        matInput placeholder="単位名"
+        formControlName="new_name"
+        maxlength="8">
+  </mat-form-field>
+</form>
+<div style="width: 100%;">
+  <div style="margin-left: auto; width: 220px;">
+    <mat-dialog-actions>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px; margin-right: 10px"
+          [disabled]="new_name.hasError('required') || selected_dinfo.dataname === ''"
+          (click)="save()">OK</button>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px;"
+          (click)="close()">キャンセル</button>
+    </mat-dialog-actions>
+  </div>
+</div>
+

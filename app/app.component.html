@@ -1,0 +1,77 @@
+<!--
+<div class="content" role="main">
+</div>
+-->
+<mat-toolbar color="primary">
+  <div class="flex_wrap_left">
+    <div>KMGraph</div>
+  </div>
+
+  <!-- This fills the remaining space of the current row -->
+  <span class="example-fill-remaining-space"></span>
+
+  <input type="file" style="display: none" #fileInput (change)="onChangeFileInput()" />
+  <button mat-button [matMenuTriggerFor]="file" class="menu_onetext">ファイル</button>
+  <!--
+  <mat-menu #file="matMenu">
+    <button mat-menu-item [matMenuTriggerFor]="open">開く</button>
+  </mat-menu>
+  -->
+  <mat-menu #file="matMenu">
+    <!--<button mat-button (click)="onClickFileInputButton()">データファイルを開く</button>-->
+    <button mat-menu-item (click)="onClickFileInputButton()">ファイルを開く</button>
+    <!--<button mat-menu-item (click)="onClickFileInputButton()">CSVファイルを開く</button>-->    
+    <button mat-menu-item>
+      <a style="text-decoration: none; color: black;"
+          id="getLocal"
+          href="#"
+          (click)="onClickSaveKmyFileButton()">ファイルを保存する</a>
+    </button>
+  </mat-menu>
+
+  <button mat-button [matMenuTriggerFor]="settings" class="menu_onetext">設定</button>
+  <mat-menu #settings="matMenu">
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickDispSpanButton()">表示期間</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickSetDataNameButton()">データ名</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickSetUnitStrButton()">単位</button>
+    <button [disabled]="!initflag || !islinegraph()" mat-menu-item (click)="onClickSetAdjustButton()">データ変換</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickDelDataButton()">データ削除</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickAverageSpanButton()">平均</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickAccumulationButton()">積算</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickSetDecimalDigitsButton()">小数点桁</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickSetColorButton()">色設定</button>
+    <!--<button [disabled]="!initflag" mat-menu-item (click)="onClickCombineButton()">グラフ結合</button>-->
+  </mat-menu>
+
+  <button mat-button [matMenuTriggerFor]="displays" class="menu_onetext">表示</button>
+  <mat-menu #displays="matMenu">
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickLineGraphButton()">折れ線グラフ</button>
+    <button [disabled]="!initflag" mat-menu-item (click)="onClickBarGraphButton()">棒グラフ</button>
+    <button mat-menu-item (click)="onClickMonitorGraphButton()">
+        <div *ngIf="mntflag === 1; else mntblock">モニタリング停止</div>
+        <ng-template #mntblock>モニタリング開始</ng-template>
+    </button>
+  </mat-menu>
+
+  <button mat-button [matMenuTriggerFor]="helps" class="menu_onetext">ヘルプ</button>
+  <mat-menu #helps="matMenu">
+    <button mat-menu-item (click)="onClickHelpButton()">ヘルプ</button>
+  </mat-menu>
+
+  <!--#adadff-->
+  <div style="margin-left: 40px; margin-right: 10px; margin-top: auto; margin-bottom: auto;
+          border-radius: 5px; background-color: #ffffff; padding-left: 5px; padding-right: 5px; padding-bottom: 5px;">
+      <a href="https://kmiot.kmshimomura.com" target="_blank" rel="noopener">
+        <img src="../../assets/kemycreativelogo.png" width="140px;">
+      </a>
+  </div>
+
+</mat-toolbar>
+<app-maingraph style="width: 100%" (msgnotify)="onmsgnotify($event)"></app-maingraph>
+<!--<router-outlet></router-outlet>-->
+<!--<div><button mat-fab color="primary" (click)="test_primary()">Primary</button></div>-->
+<!--
+<nav>
+  <a routerLink="/maingraph" routerLinkActive="active">MainGraph</a>
+</nav>
+-->

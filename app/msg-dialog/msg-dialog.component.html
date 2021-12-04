@@ -1,0 +1,24 @@
+<div>{{data.mes}}</div>
+
+<div style="width: 100%; margin-top: 20px;">
+  <div style="margin-left: auto; width: 220px;" *ngIf="data.button==='yes'; else elseblock">
+    <mat-dialog-actions>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px; margin-right: 10px"
+          (click)="save()">はい</button>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px;"
+          (click)="close()">いいえ</button>
+    </mat-dialog-actions>
+  </div>
+  <ng-template #elseblock>
+    <div style="margin-left: auto; width: 220px;">
+      <mat-dialog-actions>
+        <button class="mat-raised-button mat-primary"
+            style="width: 100px; margin-right: 10px"
+            (click)="save()">OK</button>
+      </mat-dialog-actions>
+    </div>
+  </ng-template>
+</div>
+

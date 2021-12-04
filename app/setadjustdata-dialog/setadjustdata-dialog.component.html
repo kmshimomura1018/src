@@ -1,0 +1,65 @@
+<form
+  [formGroup]="myInputAdjustdataForm">
+  <div formArrayName="dinfos">
+    <div>
+      <div style="font-weight: bold; margin-right: 20px; margin-bottom: 10px;">変換式設定</div>
+      <mat-form-field>
+        <mat-select name="setdatanamelist"
+            placeholder="データ名選択"
+            [(value)]="selected_dinfo.dataid">
+          <mat-option *ngFor="let dinfo of dinfos.controls;"
+              [value]="dinfo.controls.dinfo.value.dataid">
+              {{dinfo.controls.dinfo.value.dataname}}</mat-option>              
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="flex_wrap_left">
+    <mat-form-field style="width: 100px; margin-right: 10px;">
+      <input
+          matInput placeholder="傾き"
+          formControlName="new_slope"
+          maxlength="8">
+    </mat-form-field>
+    <div *ngIf="(new_slope.dirty || new_slope.touched)">
+      <mat-error *ngIf="cmn.isnumber(new_slope.value) === null"
+            style="font-size: 0.8rem;">
+        数値を入力してください。
+      </mat-error>
+    </div>
+
+    <mat-form-field style="width: 100px;">      
+      <input
+          matInput placeholder="切片"
+          formControlName="new_intercept"
+          maxlength="8">
+    </mat-form-field>
+    <div *ngIf="(new_intercept.dirty || new_intercept.touched)">
+      <mat-error *ngIf="cmn.isnumber(new_intercept.value) === null"
+            style="font-size: 0.8rem;">
+        数値を入力してください。
+      </mat-error>
+    </div>
+
+  </div>
+  <!--
+  <div style="margin-right: 10px;">変換式： {{adjust_info}}</div>
+  -->
+</form>
+<div style="width: 100%;">
+  <div style="margin-left: auto; width: 220px;">
+    <mat-dialog-actions>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px; margin-right: 10px"
+          [disabled]="new_slope.hasError('required')
+              || cmn.isnumber(new_slope.value) === null
+              || new_intercept.hasError('required')
+              || cmn.isnumber(new_intercept.value) === null
+              || selected_dinfo.dataid === ''"
+          (click)="save()">OK</button>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px;"
+          (click)="close()">キャンセル</button>
+    </mat-dialog-actions>
+  </div>
+</div>

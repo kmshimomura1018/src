@@ -1,0 +1,76 @@
+html, body {
+  height: 100%;
+  margin: 0; 
+  padding: 0
+}
+
+.example-fill-remaining-space {
+  /* This fills the remaining space, by using flexbox. 
+     Every toolbar row uses a flexbox row layout. */
+  flex: 1 1 auto;
+}
+
+.menu_onetext {
+  font-size: 1.0rem;
+  /*
+  margin-left: 5px;
+  margin-right: 5px;
+  */
+}
+
+.menubar {
+  height: 50px;
+  /*margin-right: -20px;*/
+  display: flex;
+  align-items: center;
+  background-color: #1976d2;
+  color: white;
+  font-weight: 600;
+}
+
+.flex_wrap_left {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flex;
+  display: -o-flex;
+  display: flex;
+  
+	-webkit-flex-wrap: wrap; /* Safari */
+	flex-wrap:    wrap;
+	-webkit-align-items: stretch;
+  align-items: stretch;
+	-webkit-justify-content: flex-start;
+	justify-content: flex-start;    /*左（上）揃え*/
+}
+
+.flex_wrap_right {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flex;
+  display: -o-flex;
+  display: flex;
+  
+	-webkit-flex-wrap: wrap; /* Safari */
+	flex-wrap:    wrap;
+	-webkit-align-items: stretch;
+  align-items: stretch;
+	-webkit-justify-content: flex-end;
+	justify-content: flex-end;    /*右（上）揃え*/
+}
+
+.flex_wrap_hcenter {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flex;
+  display: -o-flex;
+  display: flex;
+  
+	-webkit-flex-wrap: wrap; /* Safari */
+	flex-wrap:    wrap;
+	-webkit-align-items: stretch;
+  align-items: stretch;
+	-webkit-justify-content: center;
+	justify-content: center;    /*左（上）揃え*/
+}
+
+.responsive_1 { width: 300px; height: 240px; }

@@ -1,0 +1,34 @@
+<form
+  (ngSubmit)="deldata()"
+  [formGroup]="myInputDeldataForm">
+  <div formArrayName="dinfos">
+    <div>
+      <div style="font-weight: bold; margin-right: 20px; margin-bottom: 10px;">データ削除</div>
+        <mat-selection-list name="setdeldatalist" #mydeldatas
+            (selectionChange)="handleSelection(mydeldatas.selectedOptions.selected)">
+          <mat-list-option *ngFor="let dinfo of dinfos.controls"
+              color="primary"
+              [value]="dinfo.controls.dinfo.value.dataid">
+            {{dinfo.controls.dinfo.value.dataname}}
+          </mat-list-option>
+        </mat-selection-list>
+      <!--</mat-form-field>-->
+    </div>
+  </div>
+</form>
+<!--[disabled]="new_name.hasError('required') || selected_dataname === ''"-->
+
+<div style="width: 100%;">
+  <div style="margin-left: auto; width: 220px;">
+    <mat-dialog-actions>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px; margin-right: 10px"
+          (click)="save()">OK</button>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px;"
+          (click)="close()">キャンセル</button>
+    </mat-dialog-actions>
+  </div>
+</div>
+
+

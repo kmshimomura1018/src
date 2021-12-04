@@ -1,0 +1,73 @@
+.main {
+  -webkit-flex: 1;
+  flex: 1;
+}
+
+.svgtxt {
+  -webkit-touch-callout: none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  -o-user-select:none;
+  user-select:none;
+}
+
+mat-nav-list {
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.my-cdk-list-item {
+  height: 20px;
+  margin-left: 3px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.my-list-item .mat-list-item {
+  height: 20px;
+  margin-left: 3px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+th {
+  color: #fff;
+  /*padding: 0px 5px;*/
+  background: #202020;
+  font-weight: 100;
+  font-size: 0.8rem;
+  border-left:1px solid #202020;
+  border-top:1px solid #202020;
+  border-bottom:1px solid #202020;
+  text-align: center;
+  box-shadow: 0px 1px 1px rgba(255,255,255,0.3) inset;/* ボックスの内側に影を作成する */
+  height: 1px;
+}
+
+.button_1 {
+  background-color: mediumpurple;
+  font-size: 0.9rem;
+  color: white;
+  width: 80px;
+  padding: 2px;
+  text-align: center;
+}
+
+.checkbox-margin {
+  padding-top: 4px;
+  margin-left: 3px;
+}
+
+.responsive_1 { width: 300px; height: 240px; }
+
+/*
+::ng-deep .mat-checkbox .mat-checkbox-frame {
+  border-color: #212121;
+  margin-top: 4px;
+  margin-left: 3px;
+  height: 15px;
+  width: 15px;
+}
+*/

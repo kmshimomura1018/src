@@ -1,0 +1,98 @@
+<form
+  [formGroup]="myInputstrForm">
+  <!--
+  <div formArrayName="dinfos">
+    <div>
+      <div style="font-weight: bold; margin-right: 20px; margin-bottom: 10px;">単位名設定</div>
+      <mat-form-field>
+        <mat-select name="setsettings"
+            placeholder = "データ名選択"
+            [(value)]="selected_dinfo.dataid">
+          <mat-option *ngFor="let dinfo of dinfos.controls;"
+              [value]="dinfo.controls.dinfo.value.dataid">
+              {{dinfo.controls.dinfo.value.dataname}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  -->
+  <mat-form-field>
+    <input
+        matInput placeholder="サーバ名"
+        formControlName="new_name_server"
+        maxlength="256">
+  </mat-form-field>
+  <mat-form-field>
+    <input
+        matInput placeholder="ポート"
+        formControlName="new_name_port"
+        maxlength="8">
+  </mat-form-field>
+  <mat-form-field>
+    <input
+        matInput placeholder="ユーザ名"
+        formControlName="new_name_username"
+        maxlength="32">
+  </mat-form-field>
+  <mat-form-field>
+    <input
+        matInput placeholder="パスワード"
+        type="password"
+        formControlName="new_name_password"
+        maxlength="256">
+  </mat-form-field>
+  <mat-form-field>
+    <input
+        matInput placeholder="topic"
+        formControlName="new_name_topic"
+        maxlength="256">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>データch数</mat-label>
+    <mat-select formControlName="new_name_chcount" [value]="chcount_value">
+      <mat-option value="1">1</mat-option>
+      <mat-option value="2">2</mat-option>
+      <mat-option value="3">3</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field>
+    <!--[errorStateMatcher]="matcher"-->
+    <input
+        matInput placeholder="表示データ数（100～1000）"
+        formControlName="new_display_datacount"
+        maxlength="4"
+        min="100"
+        max="1000">
+  </mat-form-field>
+  <div>
+    <mat-radio-group
+        formControlName="new_name_ssl">
+      <mat-radio-button
+        color="primary"
+        value="ssl_on" style="margin-left: 5px;">SSL有</mat-radio-button>
+      <mat-radio-button
+        color="primary"
+        value="ssl_off" style="margin-left: 5px;">SSL無</mat-radio-button>
+    </mat-radio-group>
+  </div>
+</form>
+
+<div style="width: 100%;">
+  <div style="margin-left: auto; width: 220px;">
+    <mat-dialog-actions>
+      <!--
+        new_name_server.hasError('required') 
+            || new_name_port.hasError('required')
+            || new_name_username.hasError('required')
+            || new_name_password.hasError('required')        
+      -->
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px; margin-right: 10px"
+          [disabled]="myInputstrForm.invalid"
+          (click)="save()">OK</button>
+      <button class="mat-raised-button mat-primary"
+          style="width: 100px;"
+          (click)="close()">キャンセル</button>
+    </mat-dialog-actions>
+  </div>
+</div>
