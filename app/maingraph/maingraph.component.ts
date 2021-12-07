@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, Output, NgZone, ViewChild, EventEmitter } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Output, NgZone, ViewChild, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Common } from '../mycommon/common';
 import { /*TransitionCheckState,*/ MatChipsModule } from '@angular/material/chips';
@@ -37,7 +37,8 @@ export class MaingraphComponent implements OnInit {
   constructor(
       private route: ActivatedRoute,
       private dialog: MatDialog,
-      private ngZone: NgZone) {
+      private ngZone: NgZone,
+      public changeDetectorRef: ChangeDetectorRef) {
         
     this.main_app = null;
     //not use this.devMode = isDevMode();
@@ -54,12 +55,13 @@ export class MaingraphComponent implements OnInit {
   public allgraphinfo: AllGraphInfo;
   public allcmn = new Common();
 
+  alldispstart: string;  //ooo
+
   // not use ads_wrapper: number;
   // not use devMode = true;
   devMode = false;  // 20210819 test bbb+++
   
   ngOnInit() {
-
     this.allgraphinfo = new AllGraphInfo();
     this.allgraphinfo.dialog = this.dialog;
 
@@ -68,7 +70,15 @@ export class MaingraphComponent implements OnInit {
         = new DrawingApp(
             this.allgraphinfo,
             this.ngZone,
-            this.msgnotify);
+            this.msgnotify,
+            false);
+      // 子からの変更監視
+      this.main_app.addObserver(
+        (propertyName: string, oldValue: any, newValue: any) => {
+          // console.log('change observer');
+          this.changeDetectorRef.detectChanges();    
+        }
+      )
       this.main_app.mycreateelement();
       // important call order
       this.allgraphinfo.oneinfo.forEach(in_crt_ginfo => {
@@ -88,15 +98,22 @@ export class MaingraphComponent implements OnInit {
   }
 
   reset_zoom() {
+    this.initgradispmanual();
     this.main_app.reset_zoom();
   }
 
   zoom_in() {
+    this.initgradispmanual();
     this.main_app.zoom_in();
   }
 
   zoom_out() {
+    this.initgradispmanual();
     this.main_app.zoom_out();
+  }
+
+  private initgradispmanual() {
+    this.allgraphinfo.initgradispmanual();
   }
 
   public setdataname(dataid: string, newname: string) {
@@ -109,6 +126,7 @@ export class MaingraphComponent implements OnInit {
     this.allgraphinfo.setgraphinfo_dataname_buf_new(
       dataid,
       newname);
+    this.changeDetectorRef.detectChanges();      
   }
 
   public setunitstr(dataid: string, newname: string) {
@@ -118,6 +136,7 @@ export class MaingraphComponent implements OnInit {
       dataid,
       newname);
     this.main_app.setdatalisttitle();
+    this.changeDetectorRef.detectChanges();      
   }
 
   public setadjustdata(
@@ -133,10 +152,16 @@ export class MaingraphComponent implements OnInit {
       newslope,
       newintercept);
     this.main_app.adjustgraph(dataid);
+    this.changeDetectorRef.detectChanges();
   }
 
   public setdispspan(from: number, to: number) {
     this.main_app.setdispspan_x(from, to);
+    this.changeDetectorRef.detectChanges();      
+  }
+  public setdispspan_manual(from: number, to: number) {
+    this.main_app.setdispspan_x_manual(from, to);
+    this.changeDetectorRef.detectChanges();
   }
 
   public deldata(dataids: string[]) {
@@ -145,6 +170,7 @@ export class MaingraphComponent implements OnInit {
     if (this.allgraphinfo.oneinfo.length == 0) {
       this.main_app.alldelete();
     }
+    this.changeDetectorRef.detectChanges();      
   }
 
   public setcolor(dataid: string, colorstr: string) {
@@ -154,37 +180,43 @@ export class MaingraphComponent implements OnInit {
       }
     });
     this.reset_zoom();
+    this.changeDetectorRef.detectChanges();      
   }
 
   public setdecimaldigits(dataid: string, decimaldigits: string) {
     this.main_app.setdecimaldigits(dataid, decimaldigits);
     // this.reset_zoom();
+    this.changeDetectorRef.detectChanges();
   }
 
   public change_datalist(dataid: string) {
     this.main_app.change_datalist(dataid);
+    this.changeDetectorRef.detectChanges();      
   }
 
   public change_graph() {
     this.main_app.change_graph();
+    this.changeDetectorRef.detectChanges();      
   }
 
   public setgraphkind_line() {
     this.main_app.setlinegraph();
+    this.changeDetectorRef.detectChanges();      
   }
 
   public setgraphkind_bar() {
     this.main_app.setbargraph(GraphKind.bar);
+    this.changeDetectorRef.detectChanges();      
   }
 
-  // 20200630 test bbb+++
   public setaveragespan() {
     this.main_app.setavrggraph();
+    this.changeDetectorRef.detectChanges();      
   }
-  //
 
   public setaccumulation() {
     this.main_app.setbargraph();
+    this.changeDetectorRef.detectChanges();      
   }
 
   public makedmydata() {
@@ -203,11 +235,13 @@ export class MaingraphComponent implements OnInit {
     }
     //
     this.main_app.makedmydata();
+    this.changeDetectorRef.detectChanges();      
   }
 
   public stopmonitoring() {
     this.main_app.reqdata = 'stop_mnt';
     this.allgraphinfo.ismonitorflag = false;
+    this.changeDetectorRef.detectChanges();      
   }
 }
 
@@ -315,7 +349,8 @@ class DrawingApp {
   public svg_wrapper: HTMLElement;
   public prt_allginfo: AllGraphInfo;
   public all_crt_ginfo: OneGraphInfo;
-  public datastr_list: string[];
+  // public datastr_list: string[];
+  public datalistinfos: OneDatalistInfo[];
   public datalist_title: string;
   public allcmn = new Common();
   public scroll_viewport;
@@ -332,13 +367,41 @@ class DrawingApp {
   isdebug = true;
   def = new MyDef();
 
+  //Observer
+  get chgflag(): boolean {
+    return this._chgflag;
+  }
+
+  set chgflag(chgflag: boolean) {
+    if (!chgflag) return;
+    this.notifyObserver('chgflag', this._chgflag, chgflag);
+    this._chgflag = chgflag;
+  }
+
+  private observers: Function[] = [];
+
+  public addObserver(observer: Function) {
+    this.observers.push(observer);
+  }
+
+  private notifyObserver(propertyName: string, oldValue: any, newValue: any) {
+    for (let i = 0; i < this.observers.length; i++) {
+        let o = this.observers[i];
+        o.apply(this, [propertyName, oldValue, newValue]);
+    }
+  }
+  //
+
   constructor(
       in_allgraphinfo: AllGraphInfo,
       in_ngZone: any,
-      in_appmsgnotify: EventEmitter<boolean>) {
+      in_appmsgnotify: EventEmitter<boolean>,
+      private _chgflag: boolean
+      ) {
 
     this.prt_allginfo = in_allgraphinfo;
-    this.datastr_list = [];
+    // this.datastr_list = [];
+    this.datalistinfos = [];
     this.datalist_title = '';
     this.toapp_msgnotify = in_appmsgnotify;
 
@@ -390,6 +453,7 @@ class DrawingApp {
       }
     }
   }
+
   public changedatalist(dname: string) {
     this.prt_allginfo.oneinfo.forEach(d => {
       if (d.dataname_buf_new === dname 
@@ -424,6 +488,27 @@ class DrawingApp {
     if (from < to) {
       this.prt_allginfo.oneinfo.forEach(d_crt_ginfo => {
         d_crt_ginfo.setdispspan_x(from, to);
+      });
+    }
+  }
+
+  public setdispspan_x_manual(from: number, to: number) {
+    if (from < to) {
+      let wkminx = Number.MAX_SAFE_INTEGER - 1;
+      let wkmaxx = Number.MIN_SAFE_INTEGER - 1;
+      // calc max and min in all graph. 
+      this.prt_allginfo.oneinfo.forEach(d_crt_ginfo => {
+        if (wkmaxx < d_crt_ginfo.x_data_buf_max) {
+          wkmaxx = d_crt_ginfo.x_data_buf_max;
+        }
+        if (d_crt_ginfo.x_data_buf_min < wkminx) {
+          wkminx = d_crt_ginfo.x_data_buf_min;
+        }
+      });
+      if (from < wkminx) from = wkminx;
+      if (wkmaxx < to) to = wkmaxx;
+      this.prt_allginfo.oneinfo.forEach(d_crt_ginfo => {        
+        d_crt_ginfo.setdispspan_x_manual(from, to);
       });
     }
   }
@@ -649,13 +734,17 @@ class DrawingApp {
                     }
                     wkvalid_pos++;
 
-                    crt_ginfo.datastr_list.push(
-                      in_this.mycmn.getDatalistDateStr(new Date(out_tm), true, crt_ginfo.ismilliflag)
-                          + '　'
-                          + in_this.mycmn.convNumber2FixedStr(
-                                wkydata,
-                                parseInt(crt_ginfo.fixed_digit_buf, 10))
+                    //crt_ginfo.datastr_list.push(
+                    crt_ginfo.datalistinfos.push(
+                      new OneDatalistInfo(
+                        in_this.mycmn.getDatalistDateStr(new Date(out_tm), true, crt_ginfo.ismilliflag)
+                            + '　'
+                            + in_this.mycmn.convNumber2FixedStr(
+                                  wkydata,
+                                  parseInt(crt_ginfo.fixed_digit_buf, 10))                        
+                      )
                     );
+
                   }
                 }
                 // console.log(wkdata);
@@ -727,12 +816,15 @@ class DrawingApp {
         crt_ginfo.isdisplay_datalist = true;
       }
       
-      crt_ginfo.datastr_list.push(
-        this.mycmn.getDatalistDateStr(new Date(out_tm), false, crt_ginfo.ismilliflag)
-            + '　'
-            + this.mycmn.convNumber2FixedStr(
-                0,
-                parseInt(crt_ginfo.fixed_digit_buf, 10))
+      // crt_ginfo.datastr_list.push(
+      crt_ginfo.datalistinfos.push(
+        new OneDatalistInfo(
+          this.mycmn.getDatalistDateStr(new Date(out_tm), false, crt_ginfo.ismilliflag)
+              + '　'
+              + this.mycmn.convNumber2FixedStr(
+                  0,
+                  parseInt(crt_ginfo.fixed_digit_buf, 10))
+        )
       );
     }
     this.init_alldatabuf();
@@ -800,12 +892,16 @@ class DrawingApp {
               }
               wkvalid_pos++;
             }
-            crt_ginfo.datastr_list.push(
-              in_this.mycmn.getDatalistDateStr(new Date(out_tm))
-                  + '　'
-                  + in_this.mycmn.convNumber2FixedStr(
-                      wkydata,
-                      parseInt(crt_ginfo.fixed_digit_buf, 10))
+
+            //crt_ginfo.datastr_list.push(
+            crt_ginfo.datalistinfos.push(
+              new OneDatalistInfo(
+                in_this.mycmn.getDatalistDateStr(new Date(out_tm))
+                    + '　'
+                    + in_this.mycmn.convNumber2FixedStr(
+                        wkydata,
+                        parseInt(crt_ginfo.fixed_digit_buf, 10))
+              )          
             );
           }
         }
@@ -813,7 +909,8 @@ class DrawingApp {
     }
 
     if (this.allcmn.isvalid(crt_ginfo)) {
-      if (crt_ginfo.datastr_list.length > 0) {
+      //if (crt_ginfo.datastr_list.length > 0) {
+      if (crt_ginfo.datalistinfos.length > 0) {
         in_this.prt_allginfo.oneinfo.forEach(d_crt_ginfo => {
           d_crt_ginfo.isdisplay_datalist = false;
         });
@@ -835,8 +932,60 @@ class DrawingApp {
     crt_ginfo.x_data_buf_min_intvl = wkx_data_buf_min_intvl / 1000;
     crt_ginfo.x_data_base_buf_min_intvl = crt_ginfo.x_data_buf_min_intvl;
 
+    this.setmaxmindata(crt_ginfo);
     in_this.change_graph();
     return stat;
+  }
+
+  private setmaxmindata(crt_ginfo) {
+    let datalist = [];
+    crt_ginfo.datalistinfos.forEach(d => {
+      datalist.push(parseFloat(d.data.slice(20, d.data.length - 1)));
+    });
+    let max_index = this.indexOfMax(datalist);
+    let min_index = this.indexOfMin(datalist);
+
+    // console.log(max_index);
+    // console.log(min_index);
+
+    crt_ginfo.datalistinfos[max_index].ismax = true;
+    crt_ginfo.datalistinfos[min_index].ismin = true;
+  }
+
+  private indexOfMax(arr) {
+    if (arr.length === 0) {
+      return -1;
+    }
+
+    var max = arr[0];
+    var maxIndex = 0;
+
+    for (var i = 1; i < arr.length; i++) {
+      if (arr[i] > max) {
+        maxIndex = i;
+        max = arr[i];
+      }
+    }
+
+    return maxIndex;
+  }
+
+  private indexOfMin(arr) {
+    if (arr.length === 0) {
+      return -1;
+    }
+
+    var min = arr[0];
+    var minIndex = 0;
+
+    for (var i = 1; i < arr.length; i++) {
+      if (arr[i] < min) {
+        minIndex = i;
+        min = arr[i];
+      }
+    }
+
+    return minIndex;
   }
 
   public setrawdata_combine() {
@@ -870,21 +1019,34 @@ class DrawingApp {
         d_crt_ginfo.y_axisinfo.reset();
         d_crt_ginfo.x_axisinfo.reset();
         d_crt_ginfo.y_data_buf = [];
-        d_crt_ginfo.datastr_list = [];
+        // d_crt_ginfo.datastr_list = [];
+        d_crt_ginfo.datalistinfos = [];
+
         d_crt_ginfo.y_data_base_buf.forEach(d => {
           const wkd = d_crt_ginfo.adjust_info.getcalc_y(d);
           if (!d_crt_ginfo.isoverlimit_ydata(wkd) && wkd !== def_err_data) {
             d_crt_ginfo.y_data_buf.push(wkd);
-            d_crt_ginfo.datastr_list.push(this.mycmn.getDatalistDateStr(new Date(d_crt_ginfo.x_data_base_buf[wkpos]))
-                + '　'
-                + this.mycmn.convNumber2FixedStr(
-                    d_crt_ginfo.y_data_buf[wkpos],
-                    parseInt(d_crt_ginfo.fixed_digit_buf, 10)));
+
+            // d_crt_ginfo.datastr_list.push(this.mycmn.getDatalistDateStr(new Date(d_crt_ginfo.x_data_base_buf[wkpos]))
+            d_crt_ginfo.datalistinfos.push(
+              new OneDatalistInfo(
+                this.mycmn.getDatalistDateStr(new Date(d_crt_ginfo.x_data_base_buf[wkpos]))
+                  + '　'
+                  + this.mycmn.convNumber2FixedStr(
+                      d_crt_ginfo.y_data_buf[wkpos],
+                      parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+              )
+            );
           } else {
             d_crt_ginfo.y_data_buf.push(def_err_data);
-            d_crt_ginfo.datastr_list.push(this.mycmn.getDatalistDateStr(new Date(d_crt_ginfo.x_data_base_buf[wkpos]))
-                + '　'
-                + DefData.def_invalid_data_str);
+            // d_crt_ginfo.datastr_list.push(this.mycmn.getDatalistDateStr(new Date(d_crt_ginfo.x_data_base_buf[wkpos]))
+            d_crt_ginfo.datalistinfos.push(
+              new OneDatalistInfo(
+                this.mycmn.getDatalistDateStr(new Date(d_crt_ginfo.x_data_base_buf[wkpos]))
+                  + '　'
+                  + DefData.def_invalid_data_str
+              )
+            );
           }
           wkpos++;
         });
@@ -940,7 +1102,8 @@ class DrawingApp {
         
         d_crt_ginfo.y_data_buf = [];
         d_crt_ginfo.x_data_buf = [];
-        d_crt_ginfo.datastr_list = [];
+        // d_crt_ginfo.datastr_list = [];
+        d_crt_ginfo.datalistinfos = [];
 
         if (wkspan > 0) {
           let wkysum = 0;
@@ -968,16 +1131,22 @@ class DrawingApp {
                     const wktmstr = wkspan < GraphBarSpan.day_1 * 1000?
                         this.mycmn.getDatalistDateStr(new Date(wksttm)) : this.mycmn.getDatalistDayStr(new Date(wksttm));
                     // 20200630 test bbb+++
-                    if (d_crt_ginfo.datastr_list.length > 100000) {
+                    // if (d_crt_ginfo.datastr_list.length > 100000) {
+                    if (d_crt_ginfo.datalistinfos.length > 100000) {
                       errflag = true;
                       return;
                     }
                     //
-                    d_crt_ginfo.datastr_list.push(wktmstr
-                        + '　'
-                        + this.mycmn.convNumber2FixedStr(
-                            wkysum,
-                            parseInt(d_crt_ginfo.fixed_digit_buf, 10)));
+                    // d_crt_ginfo.datastr_list.push(wktmstr
+                    d_crt_ginfo.datalistinfos.push(
+                      new OneDatalistInfo(
+                        wktmstr
+                          + '　'
+                          + this.mycmn.convNumber2FixedStr(
+                              wkysum,
+                              parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+                      )
+                    );
 
                     wkysum = 0;
                     wkavrgcount = 0;  // 20200630 test bbb+++
@@ -1003,11 +1172,16 @@ class DrawingApp {
             d_crt_ginfo.y_data_buf.push(wkysum);
             const wktmstr = wkspan < GraphBarSpan.day_1 * 1000 ? 
                 this.mycmn.getDatalistDateStr(new Date(wksttm)) : this.mycmn.getDatalistDayStr(new Date(wksttm));
-            d_crt_ginfo.datastr_list.push(wktmstr
-              + '　'
-              + this.mycmn.convNumber2FixedStr(
-                  wkysum,
-                  parseInt(d_crt_ginfo.fixed_digit_buf, 10)));
+            // d_crt_ginfo.datastr_list.push(wktmstr
+            d_crt_ginfo.datalistinfos.push(
+              new OneDatalistInfo(
+                wktmstr
+                + '　'
+                + this.mycmn.convNumber2FixedStr(
+                    wkysum,
+                    parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+              )
+            );
           }
         } else {
           d_crt_ginfo.x_data_buf_min_intvl = d_crt_ginfo.x_data_base_buf_min_intvl;
@@ -1017,17 +1191,22 @@ class DrawingApp {
             if (i < d_crt_ginfo.x_data_base_buf.length) { // FP
               d_crt_ginfo.x_data_buf.push(d_crt_ginfo.x_data_base_buf[i]);
               // 20200630 test bbb+++
-              if (d_crt_ginfo.datastr_list.length > 100000) {
+              // if (d_crt_ginfo.datastr_list.length > 100000) {
+              if (d_crt_ginfo.datalistinfos.length > 100000) {
                 errflag = true;
                 break;
               }
               //
-              d_crt_ginfo.datastr_list.push(
+              // d_crt_ginfo.datastr_list.push(
+              d_crt_ginfo.datalistinfos.push(
+                new OneDatalistInfo(
                   this.mycmn.getDatalistDateStr(new Date(d_crt_ginfo.x_data_base_buf[i]))
-                + '　'
-                + this.mycmn.convNumber2FixedStr(
-                    d_crt_ginfo.y_data_base_buf[i],
-                    parseInt(d_crt_ginfo.fixed_digit_buf, 10)));
+                    + '　'
+                    + this.mycmn.convNumber2FixedStr(
+                        d_crt_ginfo.y_data_base_buf[i],
+                        parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+                )
+              );
             }
           }
         }
@@ -1298,7 +1477,8 @@ class DrawingApp {
         d_crt_ginfo.fixed_digit_buf = 
           this.allcmn.isnumber(decimaldigits) ?
             decimaldigits : '1';
-        d_crt_ginfo.datastr_list = [];
+        // d_crt_ginfo.datastr_list = [];
+        d_crt_ginfo.datalistinfos = [];
 
         let wkpos = 0;
         d_crt_ginfo.x_data_buf.forEach(xdata => {
@@ -1310,19 +1490,22 @@ class DrawingApp {
             false);
           const wkydata = d_crt_ginfo.y_data_buf[wkpos++];
       
-          d_crt_ginfo.datastr_list.push(
-            this.mycmn.getDatalistDateStr(new Date(out_tm))
-                + '　'
-                + this.mycmn.convNumber2FixedStr(
-                    wkydata,
-                    parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+          // d_crt_ginfo.datastr_list.push(
+          d_crt_ginfo.datalistinfos.push(
+            new OneDatalistInfo(
+              this.mycmn.getDatalistDateStr(new Date(out_tm))
+                  + '　'
+                  + this.mycmn.convNumber2FixedStr(
+                      wkydata,
+                      parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+            )
           );
         });
 
         localStorage.setItem(DefData.def_decimaldigits, d_crt_ginfo.fixed_digit_buf);
       }
     });
-    this.change_graph();    
+    this.change_graph();
   }
 
   public dispmsg_fopensan() {
@@ -1367,7 +1550,8 @@ class DrawingApp {
             d_crt_ginfo.x_data_buf.splice(0, 1);
             d_crt_ginfo.y_data_base_buf.splice(0, 1);
             d_crt_ginfo.y_data_buf.splice(0, 1);
-            d_crt_ginfo.datastr_list.splice(0, 1);
+            // d_crt_ginfo.datastr_list.splice(0, 1);
+            d_crt_ginfo.datalistinfos.splice(0, 1);
           }
           d_crt_ginfo.x_data_base_buf.push(out_tm);
           d_crt_ginfo.x_data_buf.push(out_tm);
@@ -1376,12 +1560,15 @@ class DrawingApp {
           d_crt_ginfo.y_data_base_buf.push(wkydata);
           d_crt_ginfo.y_data_buf.push(wkydata);
 
-          d_crt_ginfo.datastr_list.push(
-            this.mycmn.getDatalistDateStr(new Date(out_tm), true, wkmillflag)
-                + '　'
-                + this.mycmn.convNumber2FixedStr(
-                    wkydata,
-                    parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+          // d_crt_ginfo.datastr_list.push(
+          d_crt_ginfo.datalistinfos.push(
+            new OneDatalistInfo(
+              this.mycmn.getDatalistDateStr(new Date(out_tm), true, wkmillflag)
+                  + '　'
+                  + this.mycmn.convNumber2FixedStr(
+                      wkydata,
+                      parseInt(d_crt_ginfo.fixed_digit_buf, 10))
+            )
           );
           d_crt_ginfo.ismilliflag = wkmillflag;
         });
@@ -1501,7 +1688,7 @@ class DrawingApp {
             || e.clientY < DefData.menu_h + DefData.y_axis_topmrg
             || d_crt_ginfo.svg_graline_wrapper.clientHeight + DefData.menu_h + DefData.y_axis_topmrg < e.clientY) {
           this.msdownflag = false;
-          // console.log('window mouse leave');    
+          // console.log('window mouse leave');
         }
       });
     });
@@ -1560,6 +1747,8 @@ class DrawingApp {
     if (this.msdownflag) {
       if (this.ctrlkeydownflag) {
         let reterrmes = '';
+        this.prt_allginfo.initgradispmanual();
+
         for (let i=0; i<this.prt_allginfo.oneinfo.length; i++) {
           let d_crt_ginfo = this.prt_allginfo.oneinfo[i];
           d_crt_ginfo.mouse_info.drawrect_end_x = e.clientX - DefData.axis_mrg;
@@ -1571,13 +1760,14 @@ class DrawingApp {
               false);
           reterrmes = this.prt_allginfo.oneinfo[i].imp_keyup();
           if (reterrmes !== '') return;
+          this.chgflag = true; // ooo observer
         }
       } else {
         this.prt_allginfo.oneinfo.forEach(d_crt_ginfo => {
           d_crt_ginfo.imp_mouseup(e.clientX, e.clientY);
         });
       }
-      this.msdownflag = false;      
+      this.msdownflag = false;
     }
   }
 
@@ -1702,6 +1892,20 @@ class DrawingApp {
       this.prt_allginfo.ismonitorflag = false;
     }
   }
+}
+
+class OneDatalistInfo {
+  constructor(data: string,
+      ismax: boolean = false,
+      ismin: boolean = false) {
+    this.data = data;
+    this.ismax = ismax;
+    this.ismin = ismin;
+  }
+
+  public data: string;
+  public ismax: boolean;
+  public ismin: boolean;
 }
 
 class MyPos {
@@ -2093,6 +2297,10 @@ class AllGraphInfo {
   public all_gra_disp_start: string;
   public all_gra_disp_end: string;
   public all_gra_disp_avrg: string;
+  public all_gra_disp_start_manual: string;
+  public all_gra_disp_end_manual: string;
+  public all_gra_disp_avrg_manual: string;
+
   public svg_wrapper;
 
   public col_info: GraphColorInfo;
@@ -2106,6 +2314,9 @@ class AllGraphInfo {
     this.all_gra_disp_start = '';
     this.all_gra_disp_end = '';
     this.all_gra_disp_avrg = '';
+    this.all_gra_disp_start_manual = '';
+    this.all_gra_disp_end_manual = '';
+    this.all_gra_disp_avrg_manual = '';
   }
 
   // if equal dataid is exist then set new dataid.
@@ -2158,12 +2369,14 @@ class AllGraphInfo {
   // 未使用
   public setgraphinfo_datastr_list(
     in_dataid: string,
-    datastr_list: string[]) {
+    //datastr_list: string[]) {
+    datalistinfos: OneDatalistInfo[]) {
 
     // tslint:disable-next-line: prefer-for-of
     for (let i = 0; i < this.oneinfo.length; i++) {
       if (this.oneinfo[i].dataid === in_dataid) {
-        this.oneinfo[i].datastr_list = datastr_list;
+        // this.oneinfo[i].datastr_list = datastr_list;
+        this.oneinfo[i].datalistinfos = datalistinfos;
       }
     }
   }
@@ -2180,6 +2393,7 @@ class AllGraphInfo {
     }
   }
 
+  // 未使用
   public setgraphinfo_gra_disp_start(
     in_dataid: string,
     gra_disp_start: string) {
@@ -2192,6 +2406,7 @@ class AllGraphInfo {
     }
   }
 
+　// 未使用
   public setgraphinfo_gra_disp_end(
     in_dataid: string,
     gra_disp_end: string) {
@@ -2275,6 +2490,14 @@ class AllGraphInfo {
     }
   }
 
+  public initgradispmanual() {     
+    this.all_gra_disp_start = '';
+    this.all_gra_disp_end = '';
+    this.all_gra_disp_start_manual = '';
+    this.all_gra_disp_end_manual = '';
+    this.all_gra_disp_avrg_manual = '';
+  }
+
   public retselectedcol(in_crt_ginfo: OneGraphInfo) {
     if (this.oneinfo.length > 1 && in_crt_ginfo.isdisplay_datalist) {
       return '#b2d8ff';
@@ -2351,7 +2574,8 @@ class AllGraphInfo {
     src.y_data_base_buf = [];
     src.x_data_buf = [];
     src.y_data_buf = [];
-    src.datastr_list = [];
+    // src.datastr_list = [];
+    src.datalistinfos = [];
 
     wkxy_data_buf.sort((a, b) => a.x - b.x);
     let wkobj_bf = null;
@@ -2365,12 +2589,15 @@ class AllGraphInfo {
         src.x_data_buf.push(obj.x);
         src.y_data_buf.push(obj.y);
       
-        src.datastr_list.push(
-          this.mycmn.getDatalistDateStr(new Date(obj.x))
-              + '　'
-              + this.mycmn.convNumber2FixedStr(
-                    obj.y,
-                    parseInt(src.fixed_digit_buf, 10))
+        // src.datastr_list.push(
+        src.datalistinfos.push(
+          new OneDatalistInfo(
+            this.mycmn.getDatalistDateStr(new Date(obj.x))
+                + '　'
+                + this.mycmn.convNumber2FixedStr(
+                      obj.y,
+                      parseInt(src.fixed_digit_buf, 10))
+          )
        );
       }
     });
@@ -2401,7 +2628,8 @@ class OneGraphInfo {
     this.dataname_buf_old = in_dataname;
     this.dataname_buf_new = in_dataname;
     this.datalist_title = '';
-    this.datastr_list = [];
+    // this.datastr_list = [];
+    this.datalistinfos = [];
     this.xaxis_title = '';
     this.yaxis_title = '';
     this.unitstr_buf = '';
@@ -2440,7 +2668,8 @@ class OneGraphInfo {
   public dataname_buf_old: string;
   public dataname_buf_new: string;
   public datalist_title: string;
-  public datastr_list: string[];
+  // public datastr_list: string[];
+  public datalistinfos: OneDatalistInfo[];
   public xaxis_title: string;
   public yaxis_title: string;
   public unitstr_buf: string;
@@ -2581,6 +2810,14 @@ class OneGraphInfo {
   }
 
   public setdispspan_x(from: number, to: number) {
+    this.impsetdispspan_x(from, to);
+  }
+
+  public setdispspan_x_manual(from: number, to: number) {
+    return this.impsetdispspan_x(from, to, false);
+  }
+
+  public impsetdispspan_x(from: number, to: number, autoflag: boolean=true) {
     if (from < to) {
       const wkfromframe = this.mycmn.getData2Frame(
           Math.abs(from - this.x_axisinfo.mind_mrg),
@@ -2600,14 +2837,28 @@ class OneGraphInfo {
           1,
           1);
 
+      // manual span was setted after zoom.
+      if (!autoflag) {
+        //console.log('autoflag: false');
+        this.prt_allginfo.all_gra_disp_start_manual 
+            = this.mycmn.getDatalistDateStr(new Date(from));
+        this.prt_allginfo.all_gra_disp_end_manual 
+            = this.mycmn.getDatalistDateStr(new Date(to));
+        this.prt_allginfo.all_gra_disp_avrg_manual
+            = this.setdispavrg(from, to);
+      }
+      
       // don't have to retlimitoffscheck. because imp_zoom is reset before offset.
       this.x_axisinfo.offset = wkfromframe * this.expansion_x_rate;
-      this.retspanpos_x();
+      let wkprt_allginfo = this.retspanpos_x();
+      
       this.setviewbox(
         0,
         0,
         this.x_axisinfo.offset,
         this.y_axisinfo.offset);
+
+      // console.log('disp_set');
     }
   }
 
@@ -2679,7 +2930,8 @@ class OneGraphInfo {
     this.y_data_buf = [];
     this.x_data_base_buf = [];
     this.y_data_base_buf = [];
-    this.datastr_list = [];
+    // this.datastr_list = [];
+    this.datalistinfos = [];
     this.x_axisinfo.reset();
     this.y_axisinfo.reset();
   }
@@ -3058,27 +3310,37 @@ class OneGraphInfo {
   }
 
   // ++++ private function ++++
+  // private retspanpos_x() {
   private retspanpos_x() {
-    const offs = this.x_axisinfo.offset;
-    const wkdata_x_st = this.mycmn.getFrame2Data(
-                            offs,
-                            this.axis_frame_x,
-                            Math.abs(this.x_axisinfo.maxd_mrg - this.x_axisinfo.mind_mrg)
-                          );
+    if (this.prt_allginfo.all_gra_disp_start_manual == '' 
+        && this.prt_allginfo.all_gra_disp_end_manual == '') {
+      const offs = this.x_axisinfo.offset;
+      const wkdata_x_st = this.mycmn.getFrame2Data(
+                              offs,
+                              this.axis_frame_x,
+                              Math.abs(this.x_axisinfo.maxd_mrg - this.x_axisinfo.mind_mrg)
+                            );
 
-    const wkdata_x_ed = this.mycmn.getFrame2Data(
-                            this.axis_frame_x_base,
-                            this.axis_frame_x,
-                            Math.abs(this.x_axisinfo.maxd_mrg - this.x_axisinfo.mind_mrg)
-                          );
-    this.prt_allginfo.all_gra_disp_start
-      = this.mycmn.getDatalistDateStr(new Date(wkdata_x_st + this.x_axisinfo.mind_mrg));
-    this.prt_allginfo.all_gra_disp_end
-      = this.mycmn.getDatalistDateStr(new Date(wkdata_x_st + this.x_axisinfo.mind_mrg + wkdata_x_ed));
-    this.gra_disp_avrg
-      = this.setdispavrg(
-          wkdata_x_st + this.x_axisinfo.mind_mrg,
-          wkdata_x_st + wkdata_x_ed + this.x_axisinfo.mind_mrg);
+      const wkdata_x_ed = this.mycmn.getFrame2Data(
+                              this.axis_frame_x_base,
+                              this.axis_frame_x,
+                              Math.abs(this.x_axisinfo.maxd_mrg - this.x_axisinfo.mind_mrg)
+                            );
+      this.prt_allginfo.all_gra_disp_start
+        = this.mycmn.getDatalistDateStr(new Date(wkdata_x_st + this.x_axisinfo.mind_mrg));
+      this.prt_allginfo.all_gra_disp_end
+        = this.mycmn.getDatalistDateStr(new Date(wkdata_x_st + this.x_axisinfo.mind_mrg + wkdata_x_ed));
+      this.gra_disp_avrg
+        = this.setdispavrg(
+            wkdata_x_st + this.x_axisinfo.mind_mrg,
+            wkdata_x_st + wkdata_x_ed + this.x_axisinfo.mind_mrg);
+    } else {
+      this.prt_allginfo.all_gra_disp_start = this.prt_allginfo.all_gra_disp_start_manual;
+      this.prt_allginfo.all_gra_disp_end = this.prt_allginfo.all_gra_disp_end_manual;
+      this.prt_allginfo.all_gra_disp_avrg = this.prt_allginfo.all_gra_disp_avrg_manual;
+    }
+
+    return this.prt_allginfo;
     /*
     console.log('x1, xlast, pos: '
         + this.mycmn.getDateStr(new Date(this.crt_ginfo.x_axisinfo.mind_mrg))

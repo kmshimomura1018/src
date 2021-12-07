@@ -30,7 +30,7 @@
       <th>色</th>
       <th>データ名</th>
       <th>単位</th>
-      <th>データ数</th>
+      <th>全データ数</th>
       <th>期間平均値</th>
       <th>小数点桁</th>
       <!-- TODO GraphKind -->
@@ -40,7 +40,7 @@
           style="height: 0px;"
           [style.background-color]="allgraphinfo.retselectedcol(onegraphinfo)">
         <td>
-          <div style="height: 20px; width: 20px; margin-left: 5px;"
+          <div style="height: 20px; width: 20px; margin-left: 5px"
               *ngIf="allgraphinfo.oneinfo.length > 1">
             <mat-checkbox
               color="primary"
@@ -48,13 +48,57 @@
               [(ngModel)]="onegraphinfo.isdisplay"></mat-checkbox>
           </div>
         </td>
-        <td><div style="border: 1px solid black; width: 30px; height: 12px;" [style.background-color]="onegraphinfo.colstr_buf"></div></td>
-        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.dataname_buf_new}}</td>
-        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.unitstr_buf}}</td>
-        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.datastr_list.length}}</td>
-        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.gra_disp_avrg}}　{{onegraphinfo.unitstr_buf}}</td>
-        <td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.fixed_digit_buf}}</td>
-        <td *ngIf="allgraphinfo.grakind !== 'bar'" (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.adjust_info.formula}}</td>
+        <td>
+          <div style="width: 100%;">
+            <div style="border: 1px solid black; width: 30px; height: 12px;
+                    margin-left: auto; margin-right: auto;"
+                [style.background-color]="onegraphinfo.colstr_buf">
+            </div>
+          </div>
+        </td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">
+          <div style="width: 100%;">
+            <div style="margin-left: auto; margin-right: auto; width: 300px;">
+              {{onegraphinfo.dataname_buf_new}}
+            </div>
+          </div>
+        </td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">
+          <div style="width: 100%;">
+            <div style="margin-left: auto; margin-right: auto; width: 80px;">
+              {{onegraphinfo.unitstr_buf}}
+            </div>
+          </div>
+        </td>
+        <!--<td (click)="change_datalist(onegraphinfo.dataid)">{{onegraphinfo.datastr_list.length}}</td>-->
+        <td (click)="change_datalist(onegraphinfo.dataid)">
+          <div style="width: 100%;">
+            <div style="margin-left: auto; margin-right: auto; width: 100px;">
+              {{onegraphinfo.datalistinfos.length}}
+            </div>
+          </div>
+        </td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">
+          <div style="width: 100%;">
+            <div style="margin-left: auto; margin-right: auto; width: 100px;">
+              {{onegraphinfo.gra_disp_avrg}}　{{onegraphinfo.unitstr_buf}}
+            </div>
+          </div>
+        </td>
+        <td (click)="change_datalist(onegraphinfo.dataid)">
+          <div style="width: 100%;">
+            <div style="margin-left: auto; margin-right: auto; width: 30px;">
+              {{onegraphinfo.fixed_digit_buf}}
+            </div>
+          </div>
+        </td>
+        <td *ngIf="allgraphinfo.grakind !== 'bar'" (click)="change_datalist(onegraphinfo.dataid)">
+          <div style="width: 100%;">
+            <div style="margin-left: auto; margin-right: auto; width: 80px;">
+              {{onegraphinfo.adjust_info.formula}}
+            </div>
+          </div>
+        </td>
         <td></td>
       </tr>
 
@@ -95,14 +139,36 @@
     -->
     <!--minBufferPx="200" maxBufferPx="10000"-->
     <!--can't cdkVirtualFor ???-->
-    <!---->
+    
+    <!--<div *ngFor="let onedataitem of onegraphinfo.datastr_list"
+              class="my-cdk-list-item">{{onedataitem}}</div>
+    -->
+
     <cdk-virtual-scroll-viewport itemSize="50"
           id="datalist_nav_frame">
       <div *ngFor="let onegraphinfo of allgraphinfo.oneinfo">
         <div *ngIf="onegraphinfo.isdisplay_datalist">
-          <div *ngFor="let onedataitem of onegraphinfo.datastr_list"
-              class="my-cdk-list-item">{{onedataitem}}</div>
-        </div>
+          <div *ngFor="let onedataitem of onegraphinfo.datalistinfos"
+              class="my-cdk-list-item">
+              <!--
+              <ng-template #ismaxblock style="color: red" >{{onedataitem.data}}</ng-template>
+              <ng-template #isnormal style="color: blue">{{onedataitem.data}}</ng-template>
+              -->
+              <ng-container *ngIf="!onedataitem.ismax && !onedataitem.ismin; else maxmin">
+                <span>{{onedataitem.data}}</span>                
+              </ng-container>
+              <ng-template #maxmin>
+                <ng-container *ngIf="onedataitem.ismin; else max">
+                  <span style="color: red;">{{onedataitem.data}}</span>
+                </ng-container>
+                <ng-template #max>
+                  <ng-container *ngIf="onedataitem.ismax">
+                    <span style="color: red;">{{onedataitem.data}}</span>
+                  </ng-container>
+                </ng-template>
+              </ng-template>
+          </div>
+        </div> 
       </div>
     </cdk-virtual-scroll-viewport>
 

@@ -4,7 +4,7 @@
   <div formArrayName="dinfos">
     <div>
       <div style="font-weight: bold; margin-right: 20px; margin-bottom: 10px;">小数点桁数設定</div>
-      <mat-form-field>
+      <mat-form-field class="mat-form-field_100">
         <mat-select name="setdigitslist"
             placeholder = "データ名選択"
             [(value)]="selected_dinfo.dataid">
@@ -21,17 +21,39 @@
         formControlName="new_name"
         maxlength="8">
   </mat-form-field>
-</form>
-<div style="width: 100%;">
-  <div style="margin-left: auto; width: 220px;">
-    <mat-dialog-actions>
-      <button class="mat-raised-button mat-primary"
-          style="width: 100px; margin-right: 10px"
-          [disabled]="new_name.hasError('required') || selected_dinfo.dataname === ''"
-          (click)="save()">OK</button>
-      <button class="mat-raised-button mat-primary"
-          style="width: 100px;"
-          (click)="close()">キャンセル</button>
-    </mat-dialog-actions>
+  <div style="width: 100%;">
+    <div style="margin-left: auto; width: 220px;">
+      <!--<div *ngIf="new_name.errors?.['required']">Name is required.</div>-->
+      <div *ngIf="(new_name.dirty || new_name.touched)">
+        <mat-error *ngIf="!cmn.isinteger(new_name.value)"
+            style="font-size: 0.8rem;">整数を入力してください。
+        </mat-error>
+      </div>
+      <div *ngIf="(new_name.dirty || new_name.touched)">
+        <mat-error *ngIf="cmn.isnumber(new_name.value) === null"
+              style="font-size: 0.8rem;">
+          数値を入力してください。
+        </mat-error>
+      </div>  
+      <mat-dialog-actions>
+        <!--          
+        <button class="mat-raised-button mat-primary"
+        [disabled]="new_name.hasError('required') 
+        || new_name.errors?.['required']
+        || selected_dinfo.dataname === ''"
+        -->
+        <button mat-raised-button color="primary"
+            style="width: 100px; margin-right: 10px"
+            [disabled]="(new_name.hasError('required')
+                || new_name.errors?.['required']
+                || !cmn.isinteger(new_name.value)
+                || cmn.isnumber(new_name.value) === null
+                || selected_dinfo.dataname === '')"
+                (click)="save()">OK</button>
+        <button class="mat-raised-button mat-primary"
+            style="width: 100px;"
+            (click)="close()">キャンセル</button>
+      </mat-dialog-actions>
+    </div>
   </div>
-</div>
+</form>

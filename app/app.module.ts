@@ -20,6 +20,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatInputModule } from '@angular/material/input';
 
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -142,7 +143,8 @@ const appRoutes: Routes = [
     MatFormFieldModule,
     MatSelectModule,
     MatRadioModule,
-    
+    MatInputModule,
+
     ScrollingModule,
     FormsModule,
     ReactiveFormsModule,

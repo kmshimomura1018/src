@@ -127,7 +127,9 @@ export class AppComponent /*implements AfterViewInit*/{
         console.log('result_from:' + result.myfrom);
         console.log('result_to:' + result.myto);
         */
-        this.maingraphcomponent.setdispspan(result.myfrom.getTime(), result.myto.getTime());
+        //if manual set dispspan
+        this.maingraphcomponent.setdispspan_manual(result.myfrom.getTime(), result.myto.getTime());
+        // this.maingraphcomponent.setdispspan(result.myfrom.getTime(), result.myto.getTime());
       }
     });
   }

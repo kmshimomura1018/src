@@ -54,6 +54,14 @@ th {
   padding: 2px;
   text-align: center;
 }
+.button_2 {
+  background-color: mediumpurple;
+  font-size: 0.9rem;
+  color: white;
+  width: 100px;
+  padding: 2px;
+  text-align: center;
+}
 
 .checkbox-margin {
   padding-top: 4px;

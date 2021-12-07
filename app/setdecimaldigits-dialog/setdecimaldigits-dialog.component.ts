@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, NgForm, Validators, FormArray} from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { OneDataInfo_Dialog } from '../maingraph/maingraph.component';
+import { Common } from '../mycommon/common';
 
 @Component({
   selector: 'app-setdecimaldigits-dialog',
@@ -19,10 +20,11 @@ export class SetdecimaldigitsDialogComponent implements OnInit {
 
   myInputstrForm: FormGroup;
   selected_dinfo: OneDataInfo_Dialog;
+  cmn = new Common();
 
   ngOnInit() {
     const wkinitname = this.data.newname;
-
+    
     this.myInputstrForm = this.fb.group({
       dinfos: this.fb.array([]),
       new_name: new FormControl(

@@ -30,6 +30,7 @@ export class Common {
     return (pattern.test(in_num) ? Number(in_num) : null);
   }
   */
+
   public isvalid(obj: any) {
     if (obj !== null && obj !== undefined) {
       return true;
@@ -63,6 +64,11 @@ export class Common {
     if (isNaN(mill) || !(0 <= mill && mill <= 1000)) return stat;
 
     return true;
+  }
+
+  public isinteger(str) {
+    let ret = Number.isInteger(parseFloat(str));
+    return ret;
   }
 }
 
