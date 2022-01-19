@@ -1,6 +1,7 @@
 import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MaingraphComponent, OneDataInfo_Dialog, GraphBarSpan_str, DefData } from './maingraph/maingraph.component';
+import { MaingraphComponent } from './maingraph/maingraph.component';
+import { OneDataInfo_Dialog, GraphBarSpan_str, DefData } from './maingraph/mygraphclass';
 import { DispspanDialogComponent } from './dispspan-dialog/dispspan-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { SetdatanameDialogComponent } from './setdataname-dialog/setdataname-dialog.component';
@@ -10,7 +11,7 @@ import { SetdeldataDialogComponent } from './setdeldata-dialog/setdeldata-dialog
 import { SetcolorDialogComponent } from './setcolor-dialog/setcolor-dialog.component';
 import { SetdecimaldigitsDialogComponent } from './setdecimaldigits-dialog/setdecimaldigits-dialog.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { GraphKind } from './maingraph/maingraph.component';
+import { GraphKind } from './maingraph/mygraphclass';
 import { SetmonitorsettingsDialogComponent } from './setmonitorsettings-dialog/setmonitorsettings-dialog.component';
 
 @Component({

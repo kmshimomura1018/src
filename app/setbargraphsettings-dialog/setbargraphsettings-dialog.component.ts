@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { GraphBarSpan_str } from '../maingraph/maingraph.component';
+import { GraphBarSpan_str } from '../maingraph/mygraphclass';
 import { Common } from '../mycommon/common';
 
 @Component({

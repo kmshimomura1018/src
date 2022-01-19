@@ -2,7 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, NgForm, Validators, FormArray} from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 // import { OneDataInfo_Dialog } from '../maingraph/maingraph.component';
-import { DefData } from '../maingraph/maingraph.component';
+import { DefData } from '../maingraph/mygraphclass';
 import { Common, InputDataValidator, InputHankakuStrDataValidator } from '../mycommon/common';
 
 @Component({

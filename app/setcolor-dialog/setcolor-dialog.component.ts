@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormControl, FormGroupDirective, FormGroup, FormBuilder, NgForm, Validators, FormArray} from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { OneDataInfo_Dialog } from '../maingraph/maingraph.component';
+import { OneDataInfo_Dialog } from '../maingraph/mygraphclass';
 
 @Component({
   selector: 'app-setcolor-dialog',

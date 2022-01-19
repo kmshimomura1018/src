@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter, SimpleChange } from '@a
 import { Paho } from 'ng2-mqtt/mqttws31';
 import { MyglobalService } from '../service/myglobal.service';
 import { Common } from '../mycommon/common';
-import { DefData } from '../maingraph/maingraph.component';
+import { DefData } from '../maingraph/mygraphclass';
 import { MatDialog } from '@angular/material/dialog';
 import { MsgDialogComponent } from '../msg-dialog/msg-dialog.component';
 

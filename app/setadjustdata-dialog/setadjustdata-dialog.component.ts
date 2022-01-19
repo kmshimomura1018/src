@@ -3,7 +3,7 @@ import { FormControl, FormGroupDirective, FormGroup, FormBuilder, NgForm, Valida
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 import { Common } from '../mycommon/common';
-import { OneDataInfo_Dialog } from '../maingraph/maingraph.component';
+import { OneDataInfo_Dialog } from '../maingraph/mygraphclass';
 
 @Component({
   selector: 'app-setadjustdata-dialog',

@@ -1,3 +1,3 @@
 export class MyDef {
-  public ispro = true;
+  public ispro = false;
 } 
